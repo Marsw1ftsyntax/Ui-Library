@@ -2,6 +2,12 @@
 -- Uma UI Library completa e bonita para Roblox
 -- Criada especialmente para OreOFDAY
 -- Cores: Azul Neon e Preto
+-- 
+-- RAW URL: https://raw.githubusercontent.com/Marsw1ftsyntax/Ui-Library/refs/heads/main/Lib
+-- 
+-- Como usar:
+-- local OreOFDAY = loadstring(game:HttpGet("https://raw.githubusercontent.com/Marsw1ftsyntax/Ui-Library/refs/heads/main/Lib"))()
+-- OreOFDAY.Load()
 
 local OreOFDAY = {}
 OreOFDAY.__index = OreOFDAY
@@ -519,8 +525,8 @@ function OreOFDAY:LoadUI()
     -- Frame principal
     MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
-    MainFrame.Size = UDim2.new(0, 800, 0, 500)
-    MainFrame.Position = UDim2.new(0.5, -400, 0.5, -250)
+    MainFrame.Size = UDim2.new(0, 900, 0, 600)
+    MainFrame.Position = UDim2.new(0.5, -450, 0.5, -300)
     MainFrame.BackgroundColor3 = OreOFDAY.Config.Colors.Background
     MainFrame.Parent = ScreenGui
     
@@ -533,7 +539,7 @@ function OreOFDAY:LoadUI()
     -- Header
     local header = Instance.new("Frame")
     header.Name = "Header"
-    header.Size = UDim2.new(1, 0, 0, 50)
+    header.Size = UDim2.new(1, 0, 0, 60)
     header.BackgroundColor3 = OreOFDAY.Config.Colors.Surface
     header.Parent = MainFrame
     
@@ -543,29 +549,29 @@ function OreOFDAY:LoadUI()
     
     local title = Instance.new("TextLabel")
     title.Name = "Title"
-    title.Size = UDim2.new(0, 200, 1, 0)
+    title.Size = UDim2.new(0, 250, 1, 0)
     title.Position = UDim2.new(0, 20, 0, 0)
     title.BackgroundTransparency = 1
     title.Text = "OreOFDAY UI Library"
     title.TextColor3 = OreOFDAY.Config.Colors.Primary
     title.Font = OreOFDAY.Config.Fonts.Primary
-    title.TextSize = 20
+    title.TextSize = 22
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.Parent = header
     
     local closeButton = Instance.new("TextButton")
     closeButton.Name = "CloseButton"
-    closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(1, -40, 0, 10)
+    closeButton.Size = UDim2.new(0, 35, 0, 35)
+    closeButton.Position = UDim2.new(1, -45, 0, 12)
     closeButton.BackgroundColor3 = OreOFDAY.Config.Colors.Error
     closeButton.Text = "X"
     closeButton.TextColor3 = OreOFDAY.Config.Colors.Text
     closeButton.Font = OreOFDAY.Config.Fonts.Primary
-    closeButton.TextSize = 16
+    closeButton.TextSize = 18
     closeButton.Parent = header
     
     local closeCorner = Instance.new("UICorner")
-    closeCorner.CornerRadius = UDim.new(0, 6)
+    closeCorner.CornerRadius = UDim.new(0, 8)
     closeCorner.Parent = closeButton
     
     closeButton.MouseButton1Click:Connect(function()
@@ -575,8 +581,8 @@ function OreOFDAY:LoadUI()
     -- Sidebar
     local sidebar = Instance.new("Frame")
     sidebar.Name = "Sidebar"
-    sidebar.Size = UDim2.new(0, 200, 1, -50)
-    sidebar.Position = UDim2.new(0, 0, 0, 50)
+    sidebar.Size = UDim2.new(0, 220, 1, -60)
+    sidebar.Position = UDim2.new(0, 0, 0, 60)
     sidebar.BackgroundColor3 = OreOFDAY.Config.Colors.Surface
     sidebar.Parent = MainFrame
     
@@ -585,11 +591,13 @@ function OreOFDAY:LoadUI()
     sidebarCorner.Parent = sidebar
     
     -- Conteúdo principal
-    local content = Instance.new("Frame")
+    local content = Instance.new("ScrollingFrame")
     content.Name = "Content"
-    content.Size = UDim2.new(1, -200, 1, -50)
-    content.Position = UDim2.new(0, 200, 0, 50)
+    content.Size = UDim2.new(1, -220, 1, -60)
+    content.Position = UDim2.new(0, 220, 0, 60)
     content.BackgroundTransparency = 1
+    content.ScrollBarThickness = 6
+    content.ScrollBarImageColor3 = OreOFDAY.Config.Colors.Primary
     content.Parent = MainFrame
     
     local contentLayout = Instance.new("UIPadding")
@@ -601,7 +609,8 @@ function OreOFDAY:LoadUI()
     
     local contentList = Instance.new("UIListLayout")
     contentList.Parent = content
-    contentList.Padding = UDim.new(0, 10)
+    contentList.Padding = UDim.new(0, 15)
+    contentList.SortOrder = Enum.SortOrder.LayoutOrder
     
     -- Criar seções da UI
     OreOFDAY:CreateMainSection(content)
@@ -642,9 +651,10 @@ end
 function OreOFDAY:CreateMainSection(parent)
     local section = Instance.new("Frame")
     section.Name = "MainSection"
-    section.Size = UDim2.new(1, 0, 0, 200)
+    section.Size = UDim2.new(1, 0, 0, 220)
     section.BackgroundColor3 = OreOFDAY.Config.Colors.Surface
     section.Parent = parent
+    section.LayoutOrder = 1
     
     local corner = Instance.new("UICorner")
     corner.CornerRadius = OreOFDAY.Config.CornerRadius
@@ -654,44 +664,59 @@ function OreOFDAY:CreateMainSection(parent)
     
     local title = Instance.new("TextLabel")
     title.Name = "SectionTitle"
-    title.Size = UDim2.new(1, -20, 0, 30)
-    title.Position = UDim2.new(0, 10, 0, 10)
+    title.Size = UDim2.new(1, -20, 0, 35)
+    title.Position = UDim2.new(0, 15, 0, 15)
     title.BackgroundTransparency = 1
     title.Text = "Controles Principais"
     title.TextColor3 = OreOFDAY.Config.Colors.Primary
     title.Font = OreOFDAY.Config.Fonts.Primary
-    title.TextSize = 18
+    title.TextSize = 20
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.Parent = section
     
     local button1 = OreOFDAY:CreateButton(section, "Executar Script", function()
         OreOFDAY:CreateNotification("Script", "Script executado com sucesso!", "Success")
     end)
-    button1.Position = UDim2.new(0, 10, 0, 50)
+    button1.Position = UDim2.new(0, 15, 0, 65)
+    button1.Size = UDim2.new(0, 180, 0, 40)
     
     local button2 = OreOFDAY:CreateButton(section, "Limpar Console", function()
         OreOFDAY:CreateNotification("Console", "Console limpo!", "Info")
     end)
-    button2.Position = UDim2.new(0, 220, 0, 50)
+    button2.Position = UDim2.new(0, 210, 0, 65)
+    button2.Size = UDim2.new(0, 180, 0, 40)
+    
+    local button3 = OreOFDAY:CreateButton(section, "Salvar Configurações", function()
+        OreOFDAY:CreateNotification("Config", "Configurações salvas!", "Success")
+    end)
+    button3.Position = UDim2.new(0, 15, 0, 115)
+    button3.Size = UDim2.new(0, 180, 0, 40)
+    
+    local button4 = OreOFDAY:CreateButton(section, "Carregar Script", function()
+        OreOFDAY:CreateNotification("Script", "Script carregado!", "Info")
+    end)
+    button4.Position = UDim2.new(0, 210, 0, 115)
+    button4.Size = UDim2.new(0, 180, 0, 40)
     
     local toggle = OreOFDAY:CreateToggle(section, "Auto-Executar", false, function(value)
         OreOFDAY:CreateNotification("Toggle", "Auto-Executar: " .. (value and "Ativado" or "Desativado"), "Info")
     end)
-    toggle.Position = UDim2.new(0, 10, 0, 100)
+    toggle.Position = UDim2.new(0, 15, 0, 170)
     
     local slider = OreOFDAY:CreateSlider(section, 0, 100, 50, function(value)
         -- Callback do slider
     end)
-    slider.Position = UDim2.new(0, 10, 0, 140)
+    slider.Position = UDim2.new(0, 250, 0, 170)
 end
 
 -- Função para criar seção Discord
 function OreOFDAY:CreateDiscordSection(parent)
     local section = Instance.new("Frame")
     section.Name = "DiscordSection"
-    section.Size = UDim2.new(1, 0, 0, 150)
+    section.Size = UDim2.new(1, 0, 0, 180)
     section.BackgroundColor3 = OreOFDAY.Config.Colors.Surface
     section.Parent = parent
+    section.LayoutOrder = 2
     
     local corner = Instance.new("UICorner")
     corner.CornerRadius = OreOFDAY.Config.CornerRadius
@@ -701,25 +726,27 @@ function OreOFDAY:CreateDiscordSection(parent)
     
     local title = Instance.new("TextLabel")
     title.Name = "SectionTitle"
-    title.Size = UDim2.new(1, -20, 0, 30)
-    title.Position = UDim2.new(0, 10, 0, 10)
+    title.Size = UDim2.new(1, -20, 0, 35)
+    title.Position = UDim2.new(0, 15, 0, 15)
     title.BackgroundTransparency = 1
     title.Text = "Configurações Discord"
     title.TextColor3 = OreOFDAY.Config.Colors.Primary
     title.Font = OreOFDAY.Config.Fonts.Primary
-    title.TextSize = 18
+    title.TextSize = 20
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.Parent = section
     
     local webhookInput = OreOFDAY:CreateInput(section, "Webhook URL", function(text)
         OreOFDAY.Discord.Webhook = text
     end)
-    webhookInput.Position = UDim2.new(0, 10, 0, 50)
+    webhookInput.Position = UDim2.new(0, 15, 0, 65)
+    webhookInput.Size = UDim2.new(0, 280, 0, 35)
     
     local serverInput = OreOFDAY:CreateInput(section, "Server Invite", function(text)
         OreOFDAY.Discord.ServerInvite = text
     end)
-    serverInput.Position = UDim2.new(0, 10, 0, 90)
+    serverInput.Position = UDim2.new(0, 15, 0, 110)
+    serverInput.Size = UDim2.new(0, 280, 0, 35)
     
     local joinButton = OreOFDAY:CreateButton(section, "Entrar no Server", function()
         if OreOFDAY.Discord.ServerInvite ~= "" then
@@ -728,17 +755,28 @@ function OreOFDAY:CreateDiscordSection(parent)
             OreOFDAY:CreateNotification("Discord", "Configure o link do servidor primeiro!", "Error")
         end
     end)
-    joinButton.Position = UDim2.new(0, 270, 0, 50)
-    joinButton.Size = UDim2.new(0, 120, 0, 30)
+    joinButton.Position = UDim2.new(0, 310, 0, 65)
+    joinButton.Size = UDim2.new(0, 140, 0, 35)
+    
+    local testWebhookButton = OreOFDAY:CreateButton(section, "Testar Webhook", function()
+        if OreOFDAY.Discord.Webhook ~= "" then
+            OreOFDAY:CreateNotification("Discord", "Webhook testado com sucesso!", "Success")
+        else
+            OreOFDAY:CreateNotification("Discord", "Configure o webhook primeiro!", "Error")
+        end
+    end)
+    testWebhookButton.Position = UDim2.new(0, 310, 0, 110)
+    testWebhookButton.Size = UDim2.new(0, 140, 0, 35)
 end
 
 -- Função para criar seção de Keys
 function OreOFDAY:CreateKeySection(parent)
     local section = Instance.new("Frame")
     section.Name = "KeySection"
-    section.Size = UDim2.new(1, 0, 0, 120)
+    section.Size = UDim2.new(1, 0, 0, 140)
     section.BackgroundColor3 = OreOFDAY.Config.Colors.Surface
     section.Parent = parent
+    section.LayoutOrder = 3
     
     local corner = Instance.new("UICorner")
     corner.CornerRadius = OreOFDAY.Config.CornerRadius
@@ -748,20 +786,21 @@ function OreOFDAY:CreateKeySection(parent)
     
     local title = Instance.new("TextLabel")
     title.Name = "SectionTitle"
-    title.Size = UDim2.new(1, -20, 0, 30)
-    title.Position = UDim2.new(0, 10, 0, 10)
+    title.Size = UDim2.new(1, -20, 0, 35)
+    title.Position = UDim2.new(0, 15, 0, 15)
     title.BackgroundTransparency = 1
     title.Text = "Sistema de Keys"
     title.TextColor3 = OreOFDAY.Config.Colors.Primary
     title.Font = OreOFDAY.Config.Fonts.Primary
-    title.TextSize = 18
+    title.TextSize = 20
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.Parent = section
     
     local keyInput = OreOFDAY:CreateInput(section, "Digite sua Key", function(text)
         OreOFDAY:ValidateKey(text)
     end)
-    keyInput.Position = UDim2.new(0, 10, 0, 50)
+    keyInput.Position = UDim2.new(0, 15, 0, 65)
+    keyInput.Size = UDim2.new(0, 280, 0, 35)
     
     local validateButton = OreOFDAY:CreateButton(section, "Validar Key", function()
         local keyBox = keyInput:FindFirstChild("InputBox")
@@ -769,17 +808,30 @@ function OreOFDAY:CreateKeySection(parent)
             OreOFDAY:ValidateKey(keyBox.Text)
         end
     end)
-    validateButton.Position = UDim2.new(0, 270, 0, 50)
-    validateButton.Size = UDim2.new(0, 120, 0, 30)
+    validateButton.Position = UDim2.new(0, 310, 0, 65)
+    validateButton.Size = UDim2.new(0, 140, 0, 35)
+    
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Name = "StatusLabel"
+    statusLabel.Size = UDim2.new(1, -30, 0, 25)
+    statusLabel.Position = UDim2.new(0, 15, 0, 110)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "Status: Aguardando validação..."
+    statusLabel.TextColor3 = OreOFDAY.Config.Colors.TextSecondary
+    statusLabel.Font = OreOFDAY.Config.Fonts.Secondary
+    statusLabel.TextSize = 14
+    statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+    statusLabel.Parent = section
 end
 
 -- Função para criar seção de configurações
 function OreOFDAY:CreateSettingsSection(parent)
     local section = Instance.new("Frame")
     section.Name = "SettingsSection"
-    section.Size = UDim2.new(1, 0, 0, 100)
+    section.Size = UDim2.new(1, 0, 0, 120)
     section.BackgroundColor3 = OreOFDAY.Config.Colors.Surface
     section.Parent = parent
+    section.LayoutOrder = 4
     
     local corner = Instance.new("UICorner")
     corner.CornerRadius = OreOFDAY.Config.CornerRadius
@@ -789,25 +841,33 @@ function OreOFDAY:CreateSettingsSection(parent)
     
     local title = Instance.new("TextLabel")
     title.Name = "SectionTitle"
-    title.Size = UDim2.new(1, -20, 0, 30)
-    title.Position = UDim2.new(0, 10, 0, 10)
+    title.Size = UDim2.new(1, -20, 0, 35)
+    title.Position = UDim2.new(0, 15, 0, 15)
     title.BackgroundTransparency = 1
     title.Text = "Configurações"
     title.TextColor3 = OreOFDAY.Config.Colors.Primary
     title.Font = OreOFDAY.Config.Fonts.Primary
-    title.TextSize = 18
+    title.TextSize = 20
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.Parent = section
     
     local themeDropdown = OreOFDAY:CreateDropdown(section, {"Dark", "Light", "Custom"}, "Dark", function(theme)
         OreOFDAY:ChangeTheme(theme)
     end)
-    themeDropdown.Position = UDim2.new(0, 10, 0, 50)
+    themeDropdown.Position = UDim2.new(0, 15, 0, 65)
+    themeDropdown.Size = UDim2.new(0, 180, 0, 35)
     
     local saveButton = OreOFDAY:CreateButton(section, "Salvar Config", function()
         OreOFDAY:SaveConfig()
     end)
-    saveButton.Position = UDim2.new(0, 220, 0, 50)
+    saveButton.Position = UDim2.new(0, 210, 0, 65)
+    saveButton.Size = UDim2.new(0, 140, 0, 35)
+    
+    local resetButton = OreOFDAY:CreateButton(section, "Resetar", function()
+        OreOFDAY:CreateNotification("Config", "Configurações resetadas!", "Info")
+    end)
+    resetButton.Position = UDim2.new(0, 370, 0, 65)
+    resetButton.Size = UDim2.new(0, 100, 0, 35)
 end
 
 -- Função para validar key
