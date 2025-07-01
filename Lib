@@ -22,7 +22,15 @@ local Theme = {
     Button = Color3.fromRGB(60, 60, 80),
     ButtonHover = Color3.fromRGB(80, 80, 120),
     ButtonText = Color3.fromRGB(240, 240, 255),
+    ToggleOff = Color3.fromRGB(80, 80, 100),
+    ToggleOn = Color3.fromRGB(70, 130, 180),
+    ToggleKnob = Color3.fromRGB(255,255,255),
+    SliderBar = Color3.fromRGB(60, 60, 80),
+    SliderFill = Color3.fromRGB(70, 130, 180),
+    SliderKnob = Color3.fromRGB(255,255,255),
     Accent = Color3.fromRGB(70, 130, 180),
+    Notification = Color3.fromRGB(38, 38, 48),
+    NotificationText = Color3.fromRGB(240, 240, 255),
 }
 
 -- Utilitário: criar UIListLayout
@@ -55,6 +63,42 @@ local function MakeDraggable(frame, dragBar)
             local delta = input.Position - dragStart
             frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
+    end)
+end
+
+-- Notificações
+local function ShowNotification(gui, theme, text, duration)
+    local notif = Instance.new("Frame")
+    notif.Size = UDim2.new(0, 320, 0, 60)
+    notif.Position = UDim2.new(1, -340, 1, -80)
+    notif.BackgroundColor3 = theme.Notification
+    notif.BackgroundTransparency = 0.1
+    notif.BorderSizePixel = 0
+    notif.AnchorPoint = Vector2.new(0, 1)
+    notif.Parent = gui
+    notif.ZIndex = 100
+    notif.ClipsDescendants = true
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -24, 1, 0)
+    label.Position = UDim2.new(0, 12, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 16
+    label.TextColor3 = theme.NotificationText
+    label.TextWrapped = true
+    label.Parent = notif
+    label.ZIndex = 101
+    notif.BackgroundTransparency = 1
+    label.TextTransparency = 1
+    TweenService:Create(notif, TweenInfo.new(0.3), {BackgroundTransparency = 0.1}):Play()
+    TweenService:Create(label, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+    task.spawn(function()
+        task.wait(duration or 2.5)
+        TweenService:Create(label, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
+        TweenService:Create(notif, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+        task.wait(0.3)
+        notif:Destroy()
     end)
 end
 
@@ -125,6 +169,60 @@ function CursorLib:CreateWindow(opts)
     -- API da janela
     local window = {}
 
+    -- Flags para salvar valores
+    local flags = {}
+
+    function window:Notify(text, duration)
+        ShowNotification(gui, theme, text, duration)
+    end
+
+    function window:SetTheme(newTheme)
+        if type(newTheme) == "string" and Theme[newTheme] then
+            theme = Theme[newTheme]
+        elseif type(newTheme) == "table" then
+            theme = newTheme
+        else
+            return
+        end
+        -- Atualiza cores principais
+        main.BackgroundColor3 = theme.Background
+        topbar.BackgroundColor3 = theme.Topbar
+        for _, tab in pairs(tabs) do
+            tab.btn.BackgroundColor3 = theme.Tab
+            tab.btn.TextColor3 = theme.TabText
+            if tab.page.Visible then
+                tab.btn.BackgroundColor3 = theme.TabSelected
+                tab.btn.TextColor3 = theme.TabTextSelected
+            end
+        end
+        -- Atualiza todos os componentes
+        local function updateColors(obj)
+            for _, v in ipairs(obj:GetDescendants()) do
+                if v:IsA("TextLabel") or v:IsA("TextBox") or v:IsA("TextButton") then
+                    v.TextColor3 = theme.ButtonText
+                end
+                if v:IsA("Frame") or v:IsA("TextButton") or v:IsA("TextBox") then
+                    if v.Name:find("Topbar") then
+                        v.BackgroundColor3 = theme.Topbar
+                    elseif v.Name:find("Tab") then
+                        v.BackgroundColor3 = theme.Tab
+                    elseif v.Name:find("Section") then
+                        v.BackgroundColor3 = theme.Section
+                    elseif v.Name:find("Button") then
+                        v.BackgroundColor3 = theme.Button
+                    elseif v.Name:find("Toggle") then
+                        v.BackgroundColor3 = theme.ToggleOff
+                    elseif v.Name:find("Slider") then
+                        v.BackgroundColor3 = theme.SliderBar
+                    elseif v.Name:find("Color") then
+                        v.BackgroundColor3 = theme.Accent
+                    end
+                end
+            end
+        end
+        updateColors(main)
+    end
+
     function window:CreateTab(tabName)
         local tabBtn = Instance.new("TextButton")
         tabBtn.Name = tabName
@@ -187,6 +285,394 @@ function CursorLib:CreateWindow(opts)
                 end)
                 return btn
             end
+            function sectionApi:CreateToggle(opts)
+                local toggle = Instance.new("Frame")
+                toggle.Name = opts.Name or "Toggle"
+                toggle.Size = UDim2.new(1, 0, 0, 32)
+                toggle.BackgroundTransparency = 1
+                toggle.Parent = section
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(1, -60, 1, 0)
+                label.Position = UDim2.new(0, 0, 0, 0)
+                label.BackgroundTransparency = 1
+                label.Text = opts.Name or "Toggle"
+                label.Font = Enum.Font.Gotham
+                label.TextSize = 15
+                label.TextColor3 = theme.ButtonText
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.Parent = toggle
+                local box = Instance.new("Frame")
+                box.Size = UDim2.new(0, 44, 0, 22)
+                box.Position = UDim2.new(1, -54, 0.5, -11)
+                box.BackgroundColor3 = theme.ToggleOff
+                box.BorderSizePixel = 0
+                box.AnchorPoint = Vector2.new(0,0)
+                box.Parent = toggle
+                box.BackgroundTransparency = 0.2
+                local knob = Instance.new("Frame")
+                knob.Size = UDim2.new(0, 18, 0, 18)
+                knob.Position = UDim2.new(0, 2, 0.5, -9)
+                knob.BackgroundColor3 = theme.ToggleKnob
+                knob.BorderSizePixel = 0
+                knob.Parent = box
+                knob.AnchorPoint = Vector2.new(0,0)
+                knob.BackgroundTransparency = 0
+                knob.ZIndex = 2
+                knob.ClipsDescendants = true
+                local state = opts.State or false
+                local function setToggle(val, animate)
+                    state = val
+                    if val then
+                        TweenService:Create(box, TweenInfo.new(0.18), {BackgroundColor3 = theme.ToggleOn}):Play()
+                        TweenService:Create(knob, TweenInfo.new(0.18), {Position = UDim2.new(0, 24, 0.5, -9)}):Play()
+                    else
+                        TweenService:Create(box, TweenInfo.new(0.18), {BackgroundColor3 = theme.ToggleOff}):Play()
+                        TweenService:Create(knob, TweenInfo.new(0.18), {Position = UDim2.new(0, 2, 0.5, -9)}):Play()
+                    end
+                end
+                setToggle(state, false)
+                box.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        setToggle(not state, true)
+                        if opts.Callback then opts.Callback(state) end
+                        if opts.Flag then flags[opts.Flag] = toggleApi end
+                    end
+                end)
+                local toggleApi = {
+                    Set = setToggle,
+                    Get = function() return state end
+                }
+                if opts.Flag then flags[opts.Flag] = toggleApi end
+                return toggleApi
+            end
+            function sectionApi:CreateSlider(opts)
+                local slider = Instance.new("Frame")
+                slider.Name = opts.Name or "Slider"
+                slider.Size = UDim2.new(1, 0, 0, 38)
+                slider.BackgroundTransparency = 1
+                slider.Parent = section
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(1, 0, 0, 18)
+                label.Position = UDim2.new(0, 0, 0, 0)
+                label.BackgroundTransparency = 1
+                label.Text = opts.Name or "Slider"
+                label.Font = Enum.Font.Gotham
+                label.TextSize = 15
+                label.TextColor3 = theme.ButtonText
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.Parent = slider
+                local bar = Instance.new("Frame")
+                bar.Size = UDim2.new(1, -80, 0, 8)
+                bar.Position = UDim2.new(0, 0, 0, 24)
+                bar.BackgroundColor3 = theme.SliderBar
+                bar.BorderSizePixel = 0
+                bar.Parent = slider
+                bar.BackgroundTransparency = 0.2
+                local fill = Instance.new("Frame")
+                fill.Size = UDim2.new(0, 0, 1, 0)
+                fill.BackgroundColor3 = theme.SliderFill
+                fill.BorderSizePixel = 0
+                fill.Parent = bar
+                fill.BackgroundTransparency = 0
+                local knob = Instance.new("Frame")
+                knob.Size = UDim2.new(0, 16, 0, 16)
+                knob.Position = UDim2.new(0, 0, 0.5, -8)
+                knob.BackgroundColor3 = theme.SliderKnob
+                knob.BorderSizePixel = 0
+                knob.Parent = bar
+                knob.ZIndex = 2
+                knob.BackgroundTransparency = 0
+                local valueLabel = Instance.new("TextLabel")
+                valueLabel.Size = UDim2.new(0, 60, 0, 18)
+                valueLabel.Position = UDim2.new(1, 8, 0, 18)
+                valueLabel.BackgroundTransparency = 1
+                valueLabel.Text = tostring(opts.Value or 0)
+                valueLabel.Font = Enum.Font.Gotham
+                valueLabel.TextSize = 14
+                valueLabel.TextColor3 = theme.ButtonText
+                valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+                valueLabel.Parent = slider
+                local min = opts.Min or 0
+                local max = opts.Max or 100
+                local val = opts.Value or min
+                local dragging = false
+                local function setSlider(v, animate)
+                    v = math.clamp(v, min, max)
+                    val = v
+                    local percent = (v - min) / (max - min)
+                    TweenService:Create(fill, TweenInfo.new(0.15), {Size = UDim2.new(percent, 0, 1, 0)}):Play()
+                    TweenService:Create(knob, TweenInfo.new(0.15), {Position = UDim2.new(percent, -8, 0.5, -8)}):Play()
+                    valueLabel.Text = tostring(math.floor(v*100)/100) .. (opts.Suffix or "")
+                end
+                setSlider(val, false)
+                bar.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        dragging = true
+                    end
+                end)
+                bar.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        dragging = false
+                    end
+                end)
+                UserInputService.InputChanged:Connect(function(input)
+                    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                        local abs = bar.AbsolutePosition.X
+                        local size = bar.AbsoluteSize.X
+                        local mouse = UserInputService:GetMouseLocation().X
+                        local percent = math.clamp((mouse - abs) / size, 0, 1)
+                        local v = min + (max - min) * percent
+                        setSlider(v, true)
+                        if opts.Callback then opts.Callback(v) end
+                        if opts.Flag then flags[opts.Flag] = sliderApi end
+                    end
+                end)
+                local sliderApi = {
+                    Set = setSlider,
+                    Get = function() return val end
+                }
+                if opts.Flag then flags[opts.Flag] = sliderApi end
+                return sliderApi
+            end
+            function sectionApi:CreateInput(opts)
+                local inputFrame = Instance.new("Frame")
+                inputFrame.Name = opts.Name or "Input"
+                inputFrame.Size = UDim2.new(1, 0, 0, 32)
+                inputFrame.BackgroundTransparency = 1
+                inputFrame.Parent = section
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(0.4, 0, 1, 0)
+                label.Position = UDim2.new(0, 0, 0, 0)
+                label.BackgroundTransparency = 1
+                label.Text = opts.Name or "Input"
+                label.Font = Enum.Font.Gotham
+                label.TextSize = 15
+                label.TextColor3 = theme.ButtonText
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.Parent = inputFrame
+                local box = Instance.new("TextBox")
+                box.Size = UDim2.new(0.6, -12, 1, -8)
+                box.Position = UDim2.new(0.4, 8, 0, 4)
+                box.BackgroundColor3 = theme.Section
+                box.Text = opts.Default or ""
+                box.PlaceholderText = opts.Placeholder or "Digite aqui..."
+                box.Font = Enum.Font.Gotham
+                box.TextSize = 15
+                box.TextColor3 = theme.ButtonText
+                box.TextXAlignment = Enum.TextXAlignment.Left
+                box.Parent = inputFrame
+                box.ClearTextOnFocus = false
+                box.BorderSizePixel = 0
+                box.BackgroundTransparency = 0.1
+                box.FocusLost:Connect(function(enter)
+                    if enter and opts.Callback then opts.Callback(box.Text) end
+                    if opts.Flag then flags[opts.Flag] = inputApi end
+                end)
+                local inputApi = box
+                if opts.Flag then flags[opts.Flag] = inputApi end
+                return inputApi
+            end
+            function sectionApi:CreateDropdown(opts)
+                local dropFrame = Instance.new("Frame")
+                dropFrame.Name = opts.Name or "Dropdown"
+                dropFrame.Size = UDim2.new(1, 0, 0, 36)
+                dropFrame.BackgroundTransparency = 1
+                dropFrame.Parent = section
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(0.4, 0, 1, 0)
+                label.Position = UDim2.new(0, 0, 0, 0)
+                label.BackgroundTransparency = 1
+                label.Text = opts.Name or "Dropdown"
+                label.Font = Enum.Font.Gotham
+                label.TextSize = 15
+                label.TextColor3 = theme.ButtonText
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.Parent = dropFrame
+                local button = Instance.new("TextButton")
+                button.Size = UDim2.new(0.6, -12, 1, -8)
+                button.Position = UDim2.new(0.4, 8, 0, 4)
+                button.BackgroundColor3 = theme.Section
+                button.Text = opts.Options and opts.Options[1] or "Selecionar..."
+                button.Font = Enum.Font.Gotham
+                button.TextSize = 15
+                button.TextColor3 = theme.ButtonText
+                button.TextXAlignment = Enum.TextXAlignment.Left
+                button.Parent = dropFrame
+                button.BorderSizePixel = 0
+                button.BackgroundTransparency = 0.1
+                local listFrame = Instance.new("Frame")
+                listFrame.Size = UDim2.new(1, 0, 0, 0)
+                listFrame.Position = UDim2.new(0, 0, 1, 0)
+                listFrame.BackgroundColor3 = theme.Section
+                listFrame.BackgroundTransparency = 0.1
+                listFrame.Visible = false
+                listFrame.Parent = dropFrame
+                listFrame.ClipsDescendants = true
+                local layout = AddListLayout(listFrame, 0)
+                local selected = opts.Options and opts.Options[1] or nil
+                local function openList()
+                    listFrame.Visible = true
+                    local count = #opts.Options
+                    TweenService:Create(listFrame, TweenInfo.new(0.18), {Size = UDim2.new(1, 0, 0, 28*count)}):Play()
+                end
+                local function closeList()
+                    TweenService:Create(listFrame, TweenInfo.new(0.18), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+                    task.wait(0.18)
+                    listFrame.Visible = false
+                end
+                button.MouseButton1Click:Connect(function()
+                    if listFrame.Visible then closeList() else openList() end
+                end)
+                for _, opt in ipairs(opts.Options or {}) do
+                    local optBtn = Instance.new("TextButton")
+                    optBtn.Size = UDim2.new(1, 0, 0, 28)
+                    optBtn.BackgroundTransparency = 1
+                    optBtn.Text = opt
+                    optBtn.Font = Enum.Font.Gotham
+                    optBtn.TextSize = 15
+                    optBtn.TextColor3 = theme.ButtonText
+                    optBtn.Parent = listFrame
+                    optBtn.MouseButton1Click:Connect(function()
+                        selected = opt
+                        button.Text = opt
+                        closeList()
+                        if opts.Callback then opts.Callback(opt) end
+                        if opts.Flag then flags[opts.Flag] = dropdownApi end
+                    end)
+                end
+                local dropdownApi = {
+                    Get = function() return selected end,
+                    Set = function(val)
+                        selected = val
+                        button.Text = val
+                    end
+                }
+                if opts.Flag then flags[opts.Flag] = dropdownApi end
+                return dropdownApi
+            end
+            function sectionApi:CreateColorPicker(opts)
+                local colorFrame = Instance.new("Frame")
+                colorFrame.Name = opts.Name or "ColorPicker"
+                colorFrame.Size = UDim2.new(1, 0, 0, 32)
+                colorFrame.BackgroundTransparency = 1
+                colorFrame.Parent = section
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(0.4, 0, 1, 0)
+                label.Position = UDim2.new(0, 0, 0, 0)
+                label.BackgroundTransparency = 1
+                label.Text = opts.Name or "Color"
+                label.Font = Enum.Font.Gotham
+                label.TextSize = 15
+                label.TextColor3 = theme.ButtonText
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.Parent = colorFrame
+                local colorBtn = Instance.new("TextButton")
+                colorBtn.Size = UDim2.new(0, 32, 0, 24)
+                colorBtn.Position = UDim2.new(0.4, 8, 0.5, -12)
+                colorBtn.BackgroundColor3 = opts.Color or Color3.fromRGB(255,255,255)
+                colorBtn.Text = ""
+                colorBtn.Parent = colorFrame
+                colorBtn.BorderSizePixel = 0
+                colorBtn.BackgroundTransparency = 0.1
+                local pickerOpen = false
+                colorBtn.MouseButton1Click:Connect(function()
+                    pickerOpen = not pickerOpen
+                    if pickerOpen then
+                        colorBtn.BackgroundColor3 = theme.Accent
+                        if opts.Callback then opts.Callback(colorBtn.BackgroundColor3) end
+                        if opts.Flag then flags[opts.Flag] = colorApi end
+                    else
+                        colorBtn.BackgroundColor3 = opts.Color or Color3.fromRGB(255,255,255)
+                    end
+                end)
+                local colorApi = {
+                    Get = function() return colorBtn.BackgroundColor3 end,
+                    Set = function(val) colorBtn.BackgroundColor3 = val end
+                }
+                if opts.Flag then flags[opts.Flag] = colorApi end
+                return colorApi
+            end
+            function sectionApi:CreateKeybind(opts)
+                local keyFrame = Instance.new("Frame")
+                keyFrame.Name = opts.Name or "Keybind"
+                keyFrame.Size = UDim2.new(1, 0, 0, 32)
+                keyFrame.BackgroundTransparency = 1
+                keyFrame.Parent = section
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(0.4, 0, 1, 0)
+                label.Position = UDim2.new(0, 0, 0, 0)
+                label.BackgroundTransparency = 1
+                label.Text = opts.Name or "Keybind"
+                label.Font = Enum.Font.Gotham
+                label.TextSize = 15
+                label.TextColor3 = theme.ButtonText
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.Parent = keyFrame
+                local keyBtn = Instance.new("TextButton")
+                keyBtn.Size = UDim2.new(0, 60, 0, 24)
+                keyBtn.Position = UDim2.new(0.4, 8, 0.5, -12)
+                keyBtn.BackgroundColor3 = theme.Section
+                keyBtn.Text = opts.Key or "Nenhum"
+                keyBtn.Font = Enum.Font.Gotham
+                keyBtn.TextSize = 15
+                keyBtn.TextColor3 = theme.ButtonText
+                keyBtn.Parent = keyFrame
+                keyBtn.BorderSizePixel = 0
+                keyBtn.BackgroundTransparency = 0.1
+                local waiting = false
+                keyBtn.MouseButton1Click:Connect(function()
+                    keyBtn.Text = "..."
+                    waiting = true
+                end)
+                UserInputService.InputBegan:Connect(function(input, processed)
+                    if waiting and not processed and input.UserInputType == Enum.UserInputType.Keyboard then
+                        keyBtn.Text = input.KeyCode.Name
+                        waiting = false
+                        if opts.Callback then opts.Callback(input.KeyCode.Name) end
+                        if opts.Flag then flags[opts.Flag] = keyApi end
+                    end
+                end)
+                local keyApi = {
+                    Get = function() return keyBtn.Text end,
+                    Set = function(val) keyBtn.Text = val end
+                }
+                if opts.Flag then flags[opts.Flag] = keyApi end
+                return keyApi
+            end
+            function sectionApi:CreateLabel(text)
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(1, 0, 0, 22)
+                label.BackgroundTransparency = 1
+                label.Text = text or "Label"
+                label.Font = Enum.Font.Gotham
+                label.TextSize = 14
+                label.TextColor3 = theme.ButtonText
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.Parent = section
+                return label
+            end
+            function sectionApi:CreateParagraph(opts)
+                local para = Instance.new("TextLabel")
+                para.Size = UDim2.new(1, 0, 0, 48)
+                para.BackgroundTransparency = 1
+                para.Text = (opts and opts.Text) or "Paragraph"
+                para.Font = Enum.Font.Gotham
+                para.TextSize = 13
+                para.TextColor3 = theme.ButtonText
+                para.TextXAlignment = Enum.TextXAlignment.Left
+                para.TextWrapped = true
+                para.Parent = section
+                return para
+            end
+            function sectionApi:CreateDivider()
+                local div = Instance.new("Frame")
+                div.Size = UDim2.new(1, 0, 0, 2)
+                div.BackgroundColor3 = theme.Accent
+                div.BackgroundTransparency = 0.3
+                div.BorderSizePixel = 0
+                div.Parent = section
+                return div
+            end
             return sectionApi
         end
         tabs[tabName] = {btn = tabBtn, page = tabPage}
@@ -213,6 +699,42 @@ function CursorLib:CreateWindow(opts)
 
     -- Arrastar janela
     MakeDraggable(main, topbar)
+
+    -- Flags para salvar valores
+    local flags = {}
+
+    function window:SaveConfig(filename)
+        local HttpService = game:GetService("HttpService")
+        local data = HttpService:JSONEncode(flags)
+        if writefile then
+            writefile((filename or "cursorlib_config.json"), data)
+        else
+            self:Notify("Copie o texto abaixo e salve:")
+            print("[CursorLib Config]", data)
+        end
+    end
+
+    function window:LoadConfig(filename)
+        local HttpService = game:GetService("HttpService")
+        local data
+        if readfile and isfile and isfile((filename or "cursorlib_config.json")) then
+            data = readfile((filename or "cursorlib_config.json"))
+        else
+            self:Notify("Cole o texto da configuração no console.")
+            return
+        end
+        local ok, tbl = pcall(function() return HttpService:JSONDecode(data) end)
+        if ok and type(tbl) == "table" then
+            for k, v in pairs(tbl) do
+                if flags[k] and type(flags[k].Set) == "function" then
+                    flags[k]:Set(v)
+                end
+            end
+            self:Notify("Configuração carregada!")
+        else
+            self:Notify("Falha ao carregar configuração.")
+        end
+    end
 
     return window
 end
